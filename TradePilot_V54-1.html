@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TradePilot V54</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#071018;color:#eef6f8;font-family:system-ui,Arial,sans-serif}.wrap{max-width:1100px;margin:auto;padding:14px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.brand{font-size:24px;font-weight:900}.sub,.muted,.label{color:#8ea2ad;font-size:12px}.badge{padding:8px 11px;border-radius:99px;background:#172a33;font-size:11px;font-weight:800}.card{background:#0c1720;border:1px solid #1d3440;border-radius:16px;padding:14px;margin-bottom:12px}.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.select,input{width:100%;background:#08131a;color:#fff;border:1px solid #29434f;border-radius:10px;padding:10px}.label{margin-bottom:5px}.price{font-size:38px;font-weight:950;margin:14px 0 4px}.green{color:#65efa0}.red{color:#ff7080}.grid{display:grid;grid-template-columns:1.3fr .7fr;gap:12px}.chart{height:300px;background:#071018;border:1px solid #1a303a;border-radius:12px;overflow:hidden}.chart svg{width:100%;height:100%}.row{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:11px;padding:11px 15px;color:#fff;font-weight:900;cursor:pointer}.long{background:#0d7046}.short{background:#8d2639}.close{background:#715c20}.secondary{background:#182b34}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.metric{background:#09141b;border:1px solid #1b3039;border-radius:10px;padding:9px}.metric span{display:block;color:#8298a3;font-size:11px}.metric b{display:block;margin-top:4px}.posEmpty{color:#8ea2ad;padding:12px 0}.position{border:1px solid #28434e;background:#09141b;border-radius:12px;padding:12px}.posTitle{font-size:19px;font-weight:950}.posGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}.learnQ{font-size:18px;font-weight:850;line-height:1.35;margin:10px 0}.answers{display:grid;grid-template-columns:1fr 1fr;gap:8px}.answer{background:#162932;border:1px solid #29434f;color:#fff;border-radius:10px;padding:11px;text-align:left;font-weight:800;cursor:pointer}.result{margin-top:9px;line-height:1.4}.xpbar{height:7px;background:#172a33;border-radius:9px;overflow:hidden;margin-top:7px}.xpbar i{display:block;height:100%;width:0;background:#6fd6ff}.history .trade{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #19313a;font-size:12px}.notice{font-size:11px;color:#8ea2ad;margin-top:8px}.decision{border:1px solid #29434f;background:#09141b;border-radius:12px;padding:12px;margin-top:10px}.decisionHead{display:flex;justify-content:space-between;align-items:center;gap:8px}.decisionTitle{font-size:18px;font-weight:950}.decisionBadge{padding:6px 9px;border-radius:9px;font-weight:900;font-size:11px;background:#172a33}.decisionText{margin-top:7px;line-height:1.45}.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}.levels .metric{padding:8px}@media(max-width:800px){.grid{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.metrics{grid-template-columns:1fr 1fr}}@media(max-width:500px){.posGrid{grid-template-columns:1fr 1fr}.answers{grid-template-columns:1fr}.price{font-size:32px}}
+</style></head><body><div class="wrap">
+<div class="top"><div><div class="brand">TradePilot V54</div><div class="sub">Paper Trading · Lernmodus · kein Echtgeld</div></div><div id="badge" class="badge">● DEMO</div></div>
+<div class="card"><div class="controls">
+<div><div class="label">MARKT</div><select id="symbol" class="select"><option value="BTCUSDT">BTCUSDT</option><option value="ETHUSDT">ETHUSDT</option><option value="SOLUSDT">SOLUSDT</option><option value="BNBUSDT">BNBUSDT</option><option value="XRPUSDT">XRPUSDT</option></select></div>
+<div><div class="label">HEBEL</div><select id="lev" class="select"><option>1</option><option>2</option><option>3</option><option selected>5</option><option>10</option><option>20</option></select></div>
+<div><div class="label">EINSATZ (MARGIN)</div><input id="margin" type="number" value="100" min="1" step="1"></div>
+<div><div class="label">MODUS</div><select id="mode" class="select"><option value="demo">DEMO – funktioniert immer</option><option value="live">LIVE – Binance Preis</option></select></div>
+</div><div id="price" class="price">—</div><div id="change" class="muted">Markt startet…</div>
+<div class="chart"><svg id="chart" viewBox="0 0 1000 300" preserveAspectRatio="none"></svg></div><div class="decision"><div class="decisionHead"><div><div class="label">WAS SOLL ICH MACHEN?</div><div id="decisionTitle" class="decisionTitle">Markt wird analysiert…</div></div><div id="decisionBadge" class="decisionBadge">ABWARTEN</div></div><div id="decisionText" class="decisionText">Warte auf ein klares Setup.</div><div class="levels"><div class="metric"><span>Trend</span><b id="trend">—</b></div><div class="metric"><span>Momentum</span><b id="momentum">—</b></div><div class="metric"><span>Setup</span><b id="setup">—</b></div></div></div>
+<div class="row" style="margin-top:10px"><button id="long" class="btn long">LONG öffnen</button><button id="short" class="btn short">SHORT öffnen</button><button id="close" class="btn close">Position schließen</button><button id="reset" class="btn secondary">Demo zurücksetzen</button></div>
+<div class="notice"><b>Hebel kurz erklärt:</b> 1.000 € Einsatz × 5× Hebel = 5.000 € Positionsgröße. Eine Kursbewegung von 1 % entspricht damit ungefähr 50 € Gewinn oder Verlust (vor Gebühren).<br><br>V54: Der Demo-Markt bewegt sich komplett unabhängig davon, ob du LONG oder SHORT klickst. Die KI analysiert nur die Marktdaten und kann auch falsch liegen.</div></div>
+
+<div class="grid"><div>
+<div class="card"><div class="label">AKTUELLE POSITION</div><div id="position"><div class="posEmpty">Keine Position offen.</div></div></div>
+<div class="card"><div class="label">KONTO</div><div class="metrics"><div class="metric"><span>Kontostand</span><b id="balance">1.000,00 USDT</b></div><div class="metric"><span>Equity</span><b id="equity">1.000,00 USDT</b></div><div class="metric"><span>Trades</span><b id="trades">0</b></div><div class="metric"><span>Realisiert</span><b id="realized">0,00 USDT</b></div></div><div class="metrics"><div class="metric"><span>Trefferquote</span><b id="winrate">0,00%</b></div><div class="metric"><span>Gewinner</span><b id="wins">0</b></div><div class="metric"><span>Verlierer</span><b id="losses">0</b></div><div class="metric"><span>KI-Lernpunkte</span><b id="learnScore">0</b></div></div></div>
+<div class="card"><div class="label">LETZTE TRADES</div><div id="history" class="history"><div class="muted">Noch keine Trades.</div></div></div>
+</div>
+<div>
+<div class="card"><div class="label">TRADING-LERNEN</div><div><b id="level">Level 1</b> · <span id="xp">0 XP</span></div><div class="xpbar"><i id="xpbar"></i></div><div id="question" class="learnQ">Lernfrage wird geladen…</div><div id="answers" class="answers"></div><div id="result" class="result"></div><button id="next" class="btn secondary" style="margin-top:9px">Nächste Frage</button></div><div class="card" style="margin-top:12px"><div class="label">KI-LERNFORTSCHRITT</div><div id="learningStatus" class="decisionTitle" style="font-size:15px">Noch keine Trade-Erfahrung</div><div id="learningBadge" class="decisionBadge" style="display:inline-block;margin-top:7px">0 ERFAHRUNGEN</div><div id="learningText" class="notice">Die KI sammelt nach jedem geschlossenen Demo-Trade Erfahrung.</div></div>
+</div></div></div>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id);
+const starts={BTCUSDT:105000,ETHUSDT:3900,SOLUSDT:145,BNBUSDT:1000,XRPUSDT:2.4};
+let symbol=$('symbol').value, price=starts[symbol], prev=price, prices=[], candles=[], ticksInCandle=0, candleSize=5, position=null, balance=1000, realized=0, tradeCount=0, history=[], ws=null, timer=null, lastTick=Date.now();
+let xp=0, currentQuestion=null;
+  let aiMemory={long:{trades:0,wins:0,pnl:0,weight:1},short:{trades:0,wins:0,pnl:0,weight:1},features:{}};
+  let lastAnalysis=null, wins=0, losses=0;
+  let confirmedSignal='ABWARTEN', pendingSignal='ABWARTEN', pendingCount=0;
+  const STORAGE='tradepilot_v54_state';
+const questions=[
+{l:1,q:'Was bedeutet LONG?',a:['Du setzt auf steigende Kurse','Du setzt auf fallende Kurse','Du setzt den Hebel auf 1'],c:0,e:'Bei LONG verdienst du grundsätzlich, wenn der Preis nach dem Einstieg steigt.'},
+{l:1,q:'Was macht ein Stop-Loss?',a:['Er begrenzt einen möglichen Verlust','Er garantiert Gewinn','Er erhöht den Hebel'],c:0,e:'Ein Stop-Loss beendet eine Position bei einem festgelegten Kurs, um den Verlust zu begrenzen.'},
+{l:1,q:'Was bedeutet SHORT?',a:['Auf steigende Kurse setzen','Auf fallende Kurse setzen','Ohne Risiko handeln'],c:1,e:'Bei SHORT verdienst du grundsätzlich, wenn der Preis nach dem Einstieg fällt.'},
+{l:2,q:'Was passiert bei einem höheren Hebel?',a:['Gewinne und Verluste bewegen sich relativ zur Margin stärker','Das Risiko verschwindet','Der Markt bewegt sich schneller'],c:0,e:'Der Hebel vergrößert die Position relativ zur eingesetzten Margin und damit auch die Wirkung kleiner Kursbewegungen.'},
+{l:2,q:'Du hast 100 USDT Margin und 5x Hebel. Wie groß ist ungefähr das Notional?',a:['20 USDT','500 USDT','5.000 USDT'],c:1,e:'100 × 5 = 500 USDT Notional.'},
+{l:2,q:'Warum sollte man vor dem Einstieg einen SL festlegen?',a:['Damit der Verlust vorher begrenzt ist','Damit man immer gewinnt','Damit die Gebühren null sind'],c:0,e:'Der SL macht das Risiko planbarer.'},
+{l:3,q:'Was ist ein Take-Profit?',a:['Ein Kurs, bei dem eine Position automatisch Gewinn mitnimmt','Ein zusätzlicher Hebel','Eine Einzahlung'],c:0,e:'Ein TP ist ein vorher festgelegtes Gewinnziel.'},
+{l:3,q:'Wenn ein LONG von 100 auf 102 steigt, ist die Position?',a:['Im Gewinn','Im Verlust','Immer bei 0'],c:0,e:'Bei LONG ist ein höherer Kurs als der Einstieg zunächst positiv.'},
+{l:3,q:'Was ist eine wichtige Aufgabe des Risikomanagements?',a:['Positionsgröße an das Risiko anpassen','Immer 20x Hebel nutzen','Ohne SL handeln'],c:0,e:'Die Positionsgröße sollte zum geplanten Risiko passen.'},
+{l:4,q:'Warum kann ein kleiner Kursrückgang bei hohem Hebel problematisch sein?',a:['Weil die prozentuale Wirkung auf die Margin größer ist','Weil der Chart stehen bleibt','Weil LONG dann unmöglich wird'],c:0,e:'Je höher der Hebel, desto stärker wirkt eine Kursbewegung auf die eingesetzte Margin.'},
+{l:4,q:'Was ist der Unterschied zwischen Entry und Mark Price?',a:['Entry ist der Einstiegspreis, Mark Price der aktuelle Bewertungs-/Marktpreis','Es gibt keinen','Entry ist immer der aktuelle Preis'],c:0,e:'Der Entry bleibt dein Einstieg; der Mark Price verändert sich mit dem Markt.'},
+{l:5,q:'Was sollte ein Trader bei einem Setup nicht voraussetzen?',a:['100%ige Sicherheit','Einen klar definierten Einstieg','Ein festgelegtes Risiko'],c:0,e:'Kein Setup liefert 100% Sicherheit. Wahrscheinlichkeiten und Risikomanagement sind entscheidend.'}
+];
+function fmt(n,d=2){return Number(n).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function priceFmt(n){return n>=1000?fmt(n,2):n>=10?fmt(n,3):fmt(n,4)}
+function seedCandles(){candles=[];let base=price;for(let i=0;i<35;i++){let o=base*(1+(Math.random()-.5)*.006),c=o*(1+(Math.random()-.5)*.008),h=Math.max(o,c)*(1+Math.random()*.004),l=Math.min(o,c)*(1-Math.random()*.004);candles.push({o,c,h,l});base=c;}price=base;prev=price;prices=candles.slice(-20).map(x=>x.c);}
+function updateCandle(p){if(!candles.length)seedCandles();let c=candles[candles.length-1];if(ticksInCandle>=candleSize){c={o:price,c:price,h:price,l:price};candles.push(c);if(candles.length>45)candles.shift();ticksInCandle=0;}c.c=p;c.h=Math.max(c.h,p);c.l=Math.min(c.l,p);ticksInCandle++;}
+function setPrice(p){if(!Number.isFinite(p)||p<=0)return;prev=price;price=p;prices.push(p);if(prices.length>100)prices.shift();updateCandle(p);render();}
+function renderChart(){const svg=$('chart');if(!candles.length){svg.innerHTML='';return}const cs=candles.slice(-35),min=Math.min(...cs.map(x=>x.l)),max=Math.max(...cs.map(x=>x.h)),range=max-min||price*.001||1,W=1000,padX=18,step=(W-padX*2)/cs.length,bodyW=Math.max(5,step*.58),y=v=>285-(v-min)/range*255;let html='';cs.forEach((c,i)=>{const x=padX+i*step+step/2,yo=y(c.o),yc=y(c.c),yh=y(c.h),yl=y(c.l),top=Math.min(yo,yc),bh=Math.max(2,Math.abs(yc-yo)),up=c.c>=c.o,col=up?'#65efa0':'#ff7080';html+=`<line x1="${x}" y1="${yh}" x2="${x}" y2="${yl}" stroke="${col}" stroke-width="2"/><rect x="${x-bodyW/2}" y="${top}" width="${bodyW}" height="${bh}" rx="1" fill="${col}"/>`;});svg.innerHTML=html;}
+function pnl(){if(!position)return 0; return position.side==='LONG'?(price-position.entry)*position.qty:(position.entry-price)*position.qty;}
+function renderPosition(){if(!position){$('position').innerHTML='<div class="posEmpty">Keine Position offen.</div>';return} const p=pnl(), pct=p/position.margin*100, dir=p>=0?'green':'red'; $('position').innerHTML=`<div class="position"><div class="posTitle ${position.side==='LONG'?'green':'red'}">${position.side} · ${symbol}</div><div class="posGrid"><div class="metric"><span>Entry</span><b>${priceFmt(position.entry)}</b></div><div class="metric"><span>Mark Price</span><b>${priceFmt(price)}</b></div><div class="metric"><span>P&L</span><b class="${dir}">${p>=0?'+':''}${fmt(p)} USDT</b></div><div class="metric"><span>P&L %</span><b class="${dir}">${p>=0?'+':''}${fmt(pct)}%</b></div><div class="metric"><span>Einsatz / Margin</span><b>${fmt(position.margin)} USDT</b></div><div class="metric"><span>Hebel</span><b>${position.leverage}x</b></div><div class="metric"><span>Positionsgröße</span><b>${fmt(position.notional)} USDT</b></div><div class="metric"><span>Kursbewegung</span><b>${fmt(position.side==='LONG'?((price-position.entry)/position.entry*100):((position.entry-price)/position.entry*100))}%</b></div><div class="metric"><span>SL</span><b>${priceFmt(position.sl)}</b></div><div class="metric"><span>TP</span><b>${priceFmt(position.tp)}</b></div><div class="metric"><span>Dauer</span><b>${Math.floor((Date.now()-position.opened)/1000)}s</b></div></div></div>`;}
+function ema(arr,period){if(!arr.length)return 0; const k=2/(period+1); let e=arr[0]; for(let i=1;i<arr.length;i++)e=arr[i]*k+e*(1-k); return e;}
+function rsi(arr,period=14){if(arr.length<=period)return 50; let gain=0,loss=0; for(let i=arr.length-period;i<arr.length;i++){const d=arr[i]-arr[i-1]; if(d>=0)gain+=d; else loss-=d;} if(loss===0)return 100; const rs=(gain/period)/(loss/period); return 100-(100/(1+rs));}
+function analyze(){
+  const arr=prices.slice(-60);
+  if(arr.length<20)return;
+
+  const last=arr[arr.length-1];
+  const e9=ema(arr.slice(-25),9), e21=ema(arr,21), r=rsi(arr,14);
+  const recent=arr.slice(-5), previous=arr.slice(-10,-5);
+  const rm=recent.reduce((a,b)=>a+b,0)/recent.length;
+  const pm=previous.reduce((a,b)=>a+b,0)/previous.length;
+  const mom=((rm-pm)/last)*100;
+  const slope=((last-arr[Math.max(0,arr.length-10)])/arr[Math.max(0,arr.length-10)])*100;
+
+  let longScore=0, shortScore=0;
+  if(e9>e21)longScore+=30; else shortScore+=30;
+  if(last>e9)longScore+=20; else shortScore+=20;
+  if(mom>0.02)longScore+=20; else if(mom<-0.02)shortScore+=20;
+  if(r>52&&r<72)longScore+=15; else if(r<48&&r>28)shortScore+=15;
+  if(slope>0.10)longScore+=15; else if(slope<-0.10)shortScore+=15;
+
+  // Erfahrung aus abgeschlossenen Trades beeinflusst die Entscheidung,
+  // aber kann das Rohsignal nicht blind überschreiben.
+  const lm=aiMemory.long.weight, sm=aiMemory.short.weight;
+  longScore=Math.max(0,Math.min(100,longScore*lm));
+  shortScore=Math.max(0,Math.min(100,shortScore*sm));
+
+  let rawSignal='ABWARTEN', title='Kein klares Setup', trend='Seitwärts';
+  if(e9>e21*1.0005&&slope>0.08)trend='Aufwärts';
+  else if(e9<e21*0.9995&&slope<-0.08)trend='Abwärts';
+
+  if(longScore>=62 && longScore>shortScore+10)rawSignal='LONG';
+  else if(shortScore>=62 && shortScore>longScore+10)rawSignal='SHORT';
+
+  // Stabiler Entscheid: Signal muss mehrere aufeinanderfolgende Analysen bestätigen.
+  // Ein Wechsel wird nur bei einem deutlich stärkeren Gegensignal sofort akzeptiert.
+  const criticalFlip = rawSignal!=='ABWARTEN' && confirmedSignal!=='ABWARTEN' && rawSignal!==confirmedSignal && Math.abs(longScore-shortScore)>=28;
+  if(rawSignal===pendingSignal) pendingCount++; else {pendingSignal=rawSignal; pendingCount=1;}
+  if(criticalFlip || (pendingCount>=4 && rawSignal!==confirmedSignal)) confirmedSignal=rawSignal;
+  if(rawSignal==='ABWARTEN' && pendingCount>=5) confirmedSignal='ABWARTEN';
+  const signal=confirmedSignal;
+  if(signal==='LONG')title='LONG-Setup bestätigt';
+  else if(signal==='SHORT')title='SHORT-Setup bestätigt';
+
+  lastAnalysis={signal,rawSignal,rawLong:longScore,lraw:longScore,rawShort:shortScore,sraw:shortScore,
+    e9,e21,r,mom,slope,trend,price:last};
+
+  const score=signal==='LONG'?longScore:signal==='SHORT'?shortScore:Math.max(longScore,shortScore);
+  const text=signal==='LONG'
+    ?`KI sieht aktuell eher LONG: Trend aufwärts, Momentum ${mom>=0?'+':''}${mom.toFixed(3)}%, RSI ${r.toFixed(0)}. Erfahrungseinfluss ${aiMemory.long.trades} LONG-Trades.`
+    :signal==='SHORT'
+    ?`KI sieht aktuell eher SHORT: Trend abwärts, Momentum ${mom>=0?'+':''}${mom.toFixed(3)}%, RSI ${r.toFixed(0)}. Erfahrungseinfluss ${aiMemory.short.trades} SHORT-Trades.`
+    :`KI wartet: LONG ${Math.round(longScore)}/100 · SHORT ${Math.round(shortScore)}/100. Noch kein ausreichend klares Setup.`;
+
+  $('decisionTitle').textContent=title;
+  $('decisionBadge').textContent=signal;
+  $('decisionText').textContent=text;
+  $('trend').textContent=trend;
+  $('momentum').textContent=(mom>=0?'+':'')+mom.toFixed(3)+'%';
+  $('setup').textContent=`L ${Math.round(longScore)} / S ${Math.round(shortScore)}`;
+  $('decisionBadge').className='decisionBadge '+(signal==='LONG'?'green':signal==='SHORT'?'red':'');
+  const exp=aiMemory.long.trades+aiMemory.short.trades;
+  if($('learningStatus')) $('learningStatus').textContent=exp ? 'KI nutzt bisherige Trade-Erfahrung' : 'Noch keine Trade-Erfahrung';
+  if($('learningBadge')) $('learningBadge').textContent=exp+' ERFAHRUNGEN';
+  if($('learningText')) $('learningText').textContent=`LONG: ${aiMemory.long.trades} Trades · ${aiMemory.long.wins} Gewinne · Faktor ${aiMemory.long.weight.toFixed(2)} | SHORT: ${aiMemory.short.trades} Trades · ${aiMemory.short.wins} Gewinne · Faktor ${aiMemory.short.weight.toFixed(2)} · Signal-Bestätigung: ${pendingCount}/4`;
+}
+function saveState(){try{localStorage.setItem(STORAGE,JSON.stringify({balance,realized,tradeCount,history,wins,losses,xp,aiMemory}));}catch(e){}}
+function loadState(){try{const x=JSON.parse(localStorage.getItem(STORAGE)||'null');if(!x)return;balance=Number(x.balance)||1000;realized=Number(x.realized)||0;tradeCount=Number(x.tradeCount)||0;history=Array.isArray(x.history)?x.history:[];wins=Number(x.wins)||0;losses=Number(x.losses)||0;xp=Number(x.xp)||0;if(x.aiMemory)aiMemory=x.aiMemory;}catch(e){}}
+function render(){
+  $('price').textContent=priceFmt(price)+' USDT';
+  const d=price-prev;
+  $('change').textContent=(d>=0?'+':'')+priceFmt(d)+' seit letztem Tick';
+  $('change').className=d>=0?'green':'red';
+  $('balance').textContent=fmt(balance)+' USDT';
+  $('equity').textContent=fmt(balance+pnl())+' USDT';
+  $('trades').textContent=tradeCount;
+  $('realized').textContent=(realized>=0?'+':'')+fmt(realized)+' USDT';
+  $('wins').textContent=wins;
+  $('losses').textContent=losses;
+  $('winrate').textContent=fmt(tradeCount?wins/tradeCount*100:0)+'%';
+  $('learnScore').textContent=(aiMemory.long.trades+aiMemory.short.trades);
+  renderPosition();
+  renderChart();
+  analyze();
+}
+function open(side){
+  if(position)return;
+  const margin=Math.max(1,Number($('margin').value)||100);
+  const lev=Math.max(1,Number($('lev').value)||5);
+  const notional=margin*lev;
+  const qty=notional/price;
+  const sl=side==='LONG'?price*.992:price*1.008;
+  const tp=side==='LONG'?price*1.016:price*.984;
+  position={side,entry:price,qty,margin,leverage:lev,notional,sl,tp,opened:Date.now(),
+    analysis:lastAnalysis?JSON.parse(JSON.stringify(lastAnalysis)):null};
+  render();
+}
+function close(reason='Manuell'){
+  if(!position)return;
+  const p=pnl(), side=position.side;
+  balance=Math.max(0,balance+p);
+  realized+=p;
+  tradeCount++;
+  if(p>=0)wins++; else losses++;
+
+  const mem=aiMemory[side.toLowerCase()];
+  mem.trades++;
+  if(p>0)mem.wins++;
+  mem.pnl+=p;
+
+  // Simple online learning:
+  // profitable setup -> slightly increase its future weight;
+  // losing setup -> slightly reduce it. Bounds prevent runaway behavior.
+  const step=p>0?0.035:-0.025;
+  mem.weight=Math.max(0.70,Math.min(1.30,mem.weight+step));
+
+  if(position.analysis){
+    const key=position.analysis.signal+'_'+position.analysis.trend;
+    aiMemory.features[key]=(aiMemory.features[key]||0)+(p>0?1:-1);
+  }
+
+  history.unshift({side,p,reason,entry:position.entry,exit:price,weight:mem.weight});
+  position=null;
+  renderHistory();
+  saveState();
+  render();
+}
+function renderHistory(){if(!history.length){$('history').innerHTML='<div class="muted">Noch keine Trades.</div>';return} $('history').innerHTML=history.slice(0,8).map(t=>`<div class="trade"><span>${t.side} · ${t.reason}</span><b class="${t.p>=0?'green':'red'}">${t.p>=0?'+':''}${fmt(t.p)} USDT · KI ${t.weight.toFixed(2)}</b></div>`).join('');}
+function checkStops(){if(!position)return; const p=pnl(); if(p<=-position.margin*0.95){close('LIQUIDATION');return;} if(position.side==='LONG'&&(price<=position.sl||price>=position.tp))close(price<=position.sl?'SL':'TP'); if(position&&position.side==='SHORT'&&(price>=position.sl||price<=position.tp))close(price>=position.sl?'SL':'TP');}
+let market={regime:'range',drift:0,anchor:0,ticks:0,regimeTicks:0};
+function chooseRegime(){const r=Math.random(); market.regime=r<0.34?'up':r<0.68?'down':r<0.90?'range':'volatile'; market.regimeTicks=25+Math.floor(Math.random()*70); market.anchor=price;}
+function demoTick(){
+ market.ticks++; market.regimeTicks--; if(market.regimeTicks<=0)chooseRegime();
+ const noise=(Math.random()-.5)*(market.regime==='volatile'?0.0032:0.00135);
+ let drift=market.regime==='up'?0.00018:market.regime==='down'?-0.00018:0;
+ if(market.regime==='range') drift=((market.anchor-price)/price)*0.035;
+ if(market.regime==='volatile') drift+=(Math.random()-.5)*0.00035;
+ const move=drift+noise;
+ // Wichtig: Hier gibt es KEINEN Bezug zu position.side. Der Markt kennt deinen Trade nicht.
+ setPrice(price*(1+move)); checkStops();
+}
+function startDemo(){if(ws){try{ws.close()}catch(e){}ws=null} clearInterval(timer); timer=setInterval(demoTick,700); $('badge').textContent='● DEMO';}
+function startLive(){clearInterval(timer);if(ws){try{ws.close()}catch(e){}} $('badge').textContent='● LIVE PREIS'; const stream=symbol.toLowerCase()+'@markPrice@1s'; try{ws=new WebSocket('wss://fstream.binance.com/ws/'+stream); ws.onmessage=e=>{try{const x=JSON.parse(e.data);setPrice(Number(x.p));checkStops()}catch(err){}}; ws.onerror=()=>{$('badge').textContent='● LIVE FEHLER → DEMO';startDemo()}; ws.onclose=()=>{if($('mode').value==='live'&&ws){$('badge').textContent='● LIVE GETRENNT';}}}catch(e){startDemo()}}
+function reset(){position=null;localStorage.removeItem(STORAGE);balance=1000;realized=0;tradeCount=0;history=[];wins=0;losses=0;xp=0;aiMemory={long:{trades:0,wins:0,pnl:0,weight:1},short:{trades:0,wins:0,pnl:0,weight:1},features:{}};confirmedSignal='ABWARTEN';pendingSignal='ABWARTEN';pendingCount=0;price=starts[symbol];prev=price;prices=[];ticksInCandle=0;market={regime:'range',drift:0,anchor:price,ticks:0,regimeTicks:0};seedCandles();chooseRegime();renderHistory();render();startMode();}
+function startMode(){if($('mode').value==='live')startLive();else startDemo();}
+function level(){return xp<100?1:xp<250?2:xp<450?3:xp<700?4:5}
+function showQuestion(){const l=level(); const pool=questions.filter(q=>q.l<=Math.min(5,l+1)); currentQuestion=pool[Math.floor(Math.random()*pool.length)]; $('level').textContent='Level '+l; $('xp').textContent=xp+' XP'; $('xpbar').style.width=((xp%100))+'%'; $('question').textContent=currentQuestion.q; $('answers').innerHTML=currentQuestion.a.map((a,i)=>`<button class="answer" data-i="${i}">${a}</button>`).join('');$('result').textContent='';document.querySelectorAll('.answer').forEach(b=>b.onclick=()=>answer(Number(b.dataset.i)));}
+function answer(i){if(!currentQuestion)return; const ok=i===currentQuestion.c; xp=Math.min(1000,xp+(ok?25:5)); $('result').innerHTML=(ok?'<span class="green"><b>Richtig!</b></span> ':'<span class="red"><b>Falsch.</b></span> ')+currentQuestion.e;document.querySelectorAll('.answer').forEach(b=>b.disabled=true); $('level').textContent='Level '+level();$('xp').textContent=xp+' XP';$('xpbar').style.width=((xp%100))+'%';currentQuestion=null;saveState();}
+$('long').onclick=()=>open('LONG'); $('short').onclick=()=>open('SHORT'); $('close').onclick=()=>close(); $('reset').onclick=reset; $('next').onclick=showQuestion;
+$('symbol').onchange=()=>{if(position)close('Marktwechsel');symbol=$('symbol').value;price=starts[symbol];prev=price;prices=[];ticksInCandle=0;market={regime:'range',drift:0,anchor:price,ticks:0,regimeTicks:0};seedCandles();chooseRegime();startMode();render()}; $('mode').onchange=startMode;
+setInterval(()=>{renderPosition();$('equity').textContent=fmt(balance+pnl())+' USDT';},500);
+loadState();seedCandles();chooseRegime();renderHistory();render();showQuestion();startDemo();window.addEventListener('beforeunload',saveState);
+})();
+</script></body></html>
